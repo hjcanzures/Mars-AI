@@ -55,6 +55,8 @@ def check_price_update(old_price, new_price):
     if old_price is None:
         return "ok"
     old = _num(old_price, "old_price")
+    if old <= 0:
+        return "ok"
     ratio = new / old
     lo, hi = PRICE_CONFIRM_BAND
     return "ok" if lo <= ratio <= hi else "needs_confirmation"
