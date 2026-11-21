@@ -4,7 +4,7 @@ Description: ProteinPeso data layer and first tool Lambdas
 
 Globals:
   Function:
-    Runtime: python3.14
+    Runtime: python3.13
     Timeout: 10
     MemorySize: 256
 

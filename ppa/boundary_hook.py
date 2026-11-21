@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import re
+import unicodedata
 
 from ppa import limits
 
@@ -40,6 +41,14 @@ INJECTION_PATTERNS = [re.compile(p, re.IGNORECASE) for p in (
 # Case-SENSITIVE: "DAN" the jailbreak persona. Matching it case-insensitively
 # blocked ordinary users named Dan (see docs/BUILD_LOG.md, bug #2).
 INJECTION_PATTERNS_CASE_SENSITIVE = [re.compile(r"\bDAN\b")]
+
+_ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u200e\u200f\u2060\ufeff"))
+
+
+def _normalize(text):
+    """NFKC folds fullwidth/compat forms to ASCII; strip zero-width chars used to split keywords."""
+    return unicodedata.normalize("NFKC", text).translate(_ZERO_WIDTH)
+
 
 _client = None
 
@@ -86,8 +95,9 @@ def before_invocation(event):
     if len(prompt) > MAX_PROMPT_CHARS:
         return _decide("deny", "R4-TOO-LONG", "hook", "Message too long.", event)
 
+    screened = _normalize(prompt)
     for pat in INJECTION_PATTERNS + INJECTION_PATTERNS_CASE_SENSITIVE:
-        if pat.search(prompt):
+        if pat.search(screened):
             return _decide("deny", "R4-INJECTION", "hook-regex", "Instruction-override attempt blocked.", event)
 
     if GUARDRAIL_ID:

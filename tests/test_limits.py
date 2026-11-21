@@ -29,3 +29,6 @@ def test_price_band():
     assert L.check_price_update(100, 10) == "needs_confirmation"
     assert L.check_price_update(None, 100) == "ok"
     with pytest.raises(L.RuleViolation): L.check_price_update(100, -5)
+    
+def test_price_band_ignores_nonpositive_old_price():
+    assert L.check_price_update(0, 100) == "ok"
