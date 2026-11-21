@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: ProteinPeso data layer and first tool Lambdas
+
+Globals:
+  Function:
+    Runtime: python3.14
+    Timeout: 10
+    MemorySize: 256
+
+Resources:
+  TargetsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: user_id, AttributeType: S}
+      KeySchema:
+        - {AttributeName: user_id, KeyType: HASH}
+
+  MealLogTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: user_id, AttributeType: S}
+        - {AttributeName: logged_at, AttributeType: S}
+      KeySchema:
+        - {AttributeName: user_id, KeyType: HASH}
+        - {AttributeName: logged_at, KeyType: RANGE}
+
+  PricesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: item_id, AttributeType: S}
+      KeySchema:
+        - {AttributeName: item_id, KeyType: HASH}
+
+  CatalogTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: item_id, AttributeType: S}
+      KeySchema:
+        - {AttributeName: item_id, KeyType: HASH}
+
+  PlaceIndex:
+    Type: AWS::Location::PlaceIndex
+    Properties:
+      IndexName: proteinpeso-places
+      DataSource: Esri
+
+  SetTargetsFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ..
+      Handler: ppa.tools.set_targets.handler
+      Environment:
+        Variables:
+          TARGETS_TABLE: !Ref TargetsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:PutItem]
+              Resource: !GetAtt TargetsTable.Arn
+
+  ReportPriceFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ..
+      Handler: ppa.tools.report_price.handler
+      Environment:
+        Variables:
+          PRICES_TABLE: !Ref PricesTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem]
+              Resource: !GetAtt PricesTable.Arn
+
+Outputs:
+  SetTargetsArn:
+    Value: !GetAtt SetTargetsFn.Arn
+  ReportPriceArn:
+    Value: !GetAtt ReportPriceFn.Arn
