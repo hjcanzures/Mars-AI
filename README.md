@@ -1,6 +1,5 @@
-# Mars: a budget protein planner agent that can't be talked out of its rules
+# Mars: An AI agent for budget-aware meal planning, protein optimization, food expense tracking, and adaptive grocery recommendations.
 
-![CI](https://github.com/OWNER/proteinpeso/actions/workflows/ci.yml/badge.svg)
 
 Amazon Bedrock AgentCore managed harness. Student cost-of-living problem: hit your protein target for the least pesos.
 
