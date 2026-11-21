@@ -1,4 +1,4 @@
-# ProteinPeso: a budget protein planner agent that can't be talked out of its rules
+# Mars: a budget protein planner agent that can't be talked out of its rules
 
 ![CI](https://github.com/OWNER/proteinpeso/actions/workflows/ci.yml/badge.svg)
 

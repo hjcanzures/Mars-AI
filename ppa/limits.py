@@ -1,4 +1,4 @@
-"""Hard limits for ProteinPeso (single source of truth).
+"""Hard limits for Mars (single source of truth).
 
 These numbers live in code, not in the prompt. Both the lifecycle hook and the
 tool Lambdas import this module, so a rule can't be argued away by the model.
