@@ -3,3 +3,8 @@ __pycache__/
 .ruff_cache/
 *.zip
 .env
+
+.venv/
+.aws-sam/
+samconfig.toml
+out.json
