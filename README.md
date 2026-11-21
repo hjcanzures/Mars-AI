@@ -1,7 +1,7 @@
 # Mars: An AI agent for budget-aware meal planning, protein optimization, food expense tracking, and adaptive grocery recommendations.
 
 
-Amazon Bedrock AgentCore managed harness. Student cost-of-living problem: hit your protein target for the least pesos.
+Amazon Bedrock AgentCore managed harness. Student cost-of-living problem: see how you can stretch your budget for meals that leaves you satiated.
 
 **Start here**
 - Rules and how each is enforced: [RULES.md](RULES.md)
