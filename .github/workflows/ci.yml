@@ -1,0 +1,67 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      - name: Unit tests
+        run: python -m pytest -q
+      - name: Adversarial replay (fails if any case changes outcome)
+        run: python scripts/run_stress.py
+      - name: Stress results doc is up to date
+        run: git diff --exit-code docs/STRESS_RESULTS.md
+      - name: Validate hooks.json fails closed
+        run: |
+          python - <<'PY'
+          import json
+          hooks = json.load(open("infra/hooks.json"))
+          for h in hooks:
+              for name, cfg in h.items():
+                  lam = cfg["target"].get("lambda")
+                  if lam:
+                      assert lam["failureMode"] == "deny", f"{name} must fail closed"
+          print("hooks.json OK")
+          PY
+
+  package-and-deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # GitHub OIDC to AWS, no long-lived keys
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package hook Lambda
+        run: zip -r hook.zip ppa -x "*__pycache__*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hook-lambda
+          path: hook.zip
+      - name: Configure AWS credentials
+        if: vars.AWS_DEPLOY_ROLE_ARN != ''
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Deploy hook Lambda
+        if: vars.AWS_DEPLOY_ROLE_ARN != ''
+        run: |
+          aws lambda update-function-code \
+            --function-name "${{ vars.HOOK_LAMBDA_NAME }}" \
+            --zip-file fileb://hook.zip

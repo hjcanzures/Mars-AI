@@ -1,0 +1,5 @@
+[
+  {"beforeInvocation": {"name": "boundary_gate_input", "target": {"lambda": {"arn": "REPLACE_WITH_HOOK_LAMBDA_ARN", "timeoutSeconds": 10, "failureMode": "deny"}}}},
+  {"beforeToolCall": {"name": "boundary_gate_tools", "target": {"lambda": {"arn": "REPLACE_WITH_HOOK_LAMBDA_ARN", "timeoutSeconds": 10, "failureMode": "deny"}}}},
+  {"afterInvocation": {"name": "audit_trail", "target": {"eventBridge": {"arn": "REPLACE_WITH_EVENT_BUS_ARN"}}}}
+]
